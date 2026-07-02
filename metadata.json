@@ -1,0 +1,6 @@
+{
+  "name": "Personal Portfolio",
+  "description": "A quiet, confident, and editorial personal portfolio website featuring Home, Portfolio, Blog, and Motivations pages with smooth transitions, custom typography, and a cohesive light/dark color system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
