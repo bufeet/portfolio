@@ -1,78 +1,192 @@
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Page } from '../types';
 import { PageTransition } from './PageTransition';
-import { ArrowLeft, Compass } from 'lucide-react';
 
 interface BlogViewProps {
   onNavigate: (page: Page) => void;
 }
 
+interface BlogPost {
+  id: string;
+  title: string; // e.g., "June 03, 2026"
+  bullets: string[];
+}
+
+interface MonthGroup {
+  id: string; // e.g., "june-2026"
+  label: string; // e.g., "June, 2026"
+  posts: BlogPost[];
+}
+
+const BLOG_DATA: MonthGroup[] = [
+  {
+    id: 'june-2026',
+    label: 'June, 2026',
+    posts: [
+      {
+        id: 'june-03-2026',
+        title: 'June 03, 2026',
+        bullets: [
+          "The focus here is to share my views on working with technology and artificial intelligence. There are many topics I want to cover, and I feel this is the right place to have a space to express this collection of ideas and self-reflections.",
+          "By the way, this design was entirely inspired by the Claude documentation page (docs.claude.com); I find their aesthetic extremely pleasing, and I wanted to create a sense of familiarity for those already acquainted with Anthropic’s products—such as Claude itself."
+        ]
+      },
+    ]
+  }
+];
+
 export const BlogView: React.FC<BlogViewProps> = ({ onNavigate }) => {
+  const [activeMonth, setActiveMonth] = useState('june-2026');
+  const [currentTime, setCurrentTime] = useState('');
+
+  // Dynamic UTC-aligned clock in the exact format: "JULY 01, 2026 18:28 P.M."
+  useEffect(() => {
+    const updateTime = () => {
+      const date = new Date();
+      const months = [
+        "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+        "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+      ];
+      const month = months[date.getMonth()];
+      const day = String(date.getDate()).padStart(2, '0');
+      const year = date.getFullYear();
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const ampm = date.getHours() >= 12 ? 'P.M.' : 'A.M.';
+      
+      setCurrentTime(`${month} ${day}, ${year} ${hours}:${minutes} ${ampm}`);
+    };
+    
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const activeGroup = BLOG_DATA.find(item => item.id === activeMonth) || BLOG_DATA[0];
+
   return (
     <PageTransition id="blog-view-container">
-      {/* 
-        This is a light-themed page utilizing color-bg-light (#EEEDE9) as background 
-        and color-bg-primary (#141413) as text for that distinctive, high-end 
-        Swiss editorial publication appearance.
-      */}
-      <div className="flex-1 bg-[#EEEDE9] text-[#141413] transition-colors duration-500">
-        <div className="max-w-4xl w-full mx-auto px-6 md:px-12 py-10 flex flex-col min-h-screen justify-between z-10 relative">
-          
-          {/* TOP BAR */}
-          <div className="flex items-center justify-between border-b border-[#141413]/10 pb-6 mb-12" id="blog-header">
+      {/* Main container mimicking PortfolioView.tsx structure and matching the provided image layout */}
+      <div className="flex-1 max-w-6xl w-full mx-auto px-6 md:px-12 py-10 flex flex-col justify-between z-10 relative select-none min-h-screen">
+        
+        <div>
+          {/* TOP SECTION: Back navigation link */}
+          <div className="mb-12" id="blog-top-bar">
             <button
               onClick={() => onNavigate(Page.Home)}
-              className="group flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-[#141413]/80 hover:text-[#D97757] transition-colors"
+              className="text-sm md:text-base font-sans font-medium text-[#D97757] hover:opacity-85 transition-opacity flex items-center gap-2 cursor-pointer"
               id="blog-back-btn"
             >
-              <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-              <span>Go Home</span>
+              ← Go back
             </button>
+          </div>
+
+          {/* TWO-COLUMN GRID */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start" id="blog-content-layout">
             
-            <div className="flex items-center gap-2 text-xs font-mono text-[#434343] uppercase tracking-wider" id="blog-edition">
-              <Compass size={12} className="text-[#D97757]" />
-              <span>Journal • Editorial</span>
+            {/* LEFT COLUMN: Post Contents */}
+            <div className="lg:col-span-8 flex flex-col gap-12 md:gap-16" id="blog-posts-column">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeMonth}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex flex-col gap-12 md:gap-16"
+                >
+                  {activeGroup.posts.map((post) => (
+                    <div 
+                      key={post.id} 
+                      className="flex flex-col gap-6"
+                      id={`post-container-${post.id}`}
+                    >
+                      {/* Labeled with the month, day, and year */}
+                      <h2 className="text-3xl md:text-[40px] font-sans font-bold tracking-tight text-[#EEEDE9] leading-none">
+                        {post.title}
+                      </h2>
+                      
+                      {/* All content must be presented exclusively in bullet points */}
+                      <ul className="space-y-6 md:space-y-8 pl-1 text-[#EEEDE9]/80 font-serif text-sm md:text-[17px] leading-relaxed">
+                        {post.bullets.map((bullet, idx) => (
+                          <li 
+                            key={idx} 
+                            className="relative pl-6 flex items-start"
+                            id={`bullet-${post.id}-${idx}`}
+                          >
+                            <span className="absolute left-0 top-[0.625em] w-1.5 h-1.5 bg-[#EEEDE9]/60 rounded-full flex-shrink-0" />
+                            <span>{bullet}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </motion.div>
+              </AnimatePresence>
             </div>
-          </div>
 
-          {/* MAIN CONTAINER */}
-          <div className="flex-1 flex flex-col items-center justify-center text-center py-20" id="blog-main-content">
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="max-w-md flex flex-col items-center"
-            >
-              <span className="text-xs font-mono uppercase tracking-[0.2em] text-[#D97757] mb-6 block font-bold">
-                STATUS • IN PROGRESS
-              </span>
-              
-              <h2 className="text-3xl md:text-4xl font-serif italic text-[#141413] mb-4">
-                This section is still under construction.
-              </h2>
-              
-              <p className="font-sans text-xs uppercase tracking-widest text-[#434343]/60 max-w-xs leading-relaxed mt-4">
-                We are crafting thoughtful long-form essays and documentation. Please check back later.
-              </p>
-              
-              <button
-                onClick={() => onNavigate(Page.Home)}
-                className="mt-10 px-6 py-3 bg-[#141413] text-[#EEEDE9] hover:bg-[#D97757] hover:text-[#141413] text-xs font-mono uppercase tracking-widest transition-all duration-300 rounded-lg cursor-pointer"
-                id="blog-return-home-btn"
+            {/* RIGHT COLUMN: Sidebar Navigation */}
+            <div className="lg:col-span-4 relative flex justify-end mt-8 lg:mt-0" id="blog-sidebar-column">
+
+              {/* Sidebar Card */}
+              <div 
+                className="w-full max-w-[320px] bg-[#111110] border border-[#EEEDE9]/5 rounded-2xl relative shadow-2xl"
+                id="blog-sidebar-card"
               >
-                Return to main page
-              </button>
-            </motion.div>
-          </div>
+                {/* Subtle decorative scrollbar track overlay on the right edge mimicking the image scrollbar */}
+                <div className="absolute right-1 top-2 bottom-2 w-1.5 bg-white/5 rounded-full pointer-events-none">
+                  <div className="w-full h-1/4 bg-[#D97757]/30 rounded-full" />
+                </div>
 
-          {/* FOOTER */}
-          <div className="border-t border-[#141413]/10 pt-8 mt-12 flex justify-between items-center text-[10px] font-mono uppercase tracking-widest text-[#434343]" id="blog-footer">
-            <span>EDITORIAL PLATFORM</span>
-            <span>© 2026 RECTILINEAR PUBLISHING</span>
-          </div>
+                <div className="flex flex-col" id="blog-sidebar-menu">
+                  {BLOG_DATA.map((item, index) => {
+                    const isActive = activeMonth === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setActiveMonth(item.id)}
+                        className={`w-full text-left py-5 px-6 font-sans text-sm md:text-base border-b border-[#EEEDE9]/5 last:border-b-0 relative transition-all duration-300 cursor-pointer ${
+                          isActive 
+                            ? 'text-[#EEEDE9] font-bold' 
+                            : 'text-[#EEEDE9]/35 hover:text-[#EEEDE9]/70'
+                        }`}
+                        style={{
+                          borderTopLeftRadius: index === 0 ? '1rem' : '0',
+                          borderTopRightRadius: index === 0 ? '1rem' : '0',
+                          borderBottomLeftRadius: index === BLOG_DATA.length - 1 ? '1rem' : '0',
+                          borderBottomRightRadius: index === BLOG_DATA.length - 1 ? '1rem' : '0',
+                        }}
+                        id={`month-selector-${item.id}`}
+                      >
+                        {/* Dynamic Active Caret outside the card pointing left towards the contents */}
+                        {isActive && (
+                          <motion.div
+                            layoutId="sidebar-active-caret"
+                            className="absolute -left-[7px] top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-[#111110] rotate-45 border-l border-b border-[#EEEDE9]/5 z-10"
+                            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                          />
+                        )}
+                        <span className="relative z-20">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
+            </div>
+
+          </div>
         </div>
+
+        {/* BOTTOM SPACER LINE */}
+        <div 
+          className="border-t border-[#EEEDE9]/15 pt-6 w-full mt-20"
+          id="blog-footer-line"
+        >
+          {/* Elegant negative spacing to anchor the page */}
+        </div>
+
       </div>
     </PageTransition>
   );
