@@ -21,17 +21,25 @@ interface MonthGroup {
 
 const BLOG_DATA: MonthGroup[] = [
   {
-    id: 'june-2026',
-    label: 'June, 2026',
+    id: 'july-2026',
+    label: 'July, 2026',
     posts: [
       {
-        id: 'june-03-2026',
-        title: 'June 03, 2026',
+        id: 'july-01-2026',
+        title: 'July 01, 2026',
         bullets: [
           "The focus here is to share my views on working with technology and artificial intelligence. There are many topics I want to cover, and I feel this is the right place to have a space to express this collection of ideas and self-reflections.",
           "By the way, this design was entirely inspired by the Claude documentation page (docs.claude.com); I find their aesthetic extremely pleasing, and I wanted to create a sense of familiarity for those already acquainted with Anthropic’s products—such as Claude itself."
         ]
       },
+      {
+        id: 'july-03-2026',
+        title: 'July 03, 2026',
+        bullets: [
+          "Scribe is a tool I hold very dear. It isn't just another note-taking app—and I don't want it to be. Instead, I want it to be a space where people can take pride in writing their most significant career contributions—perhaps realizing a literary dream or crafting a well-written piece—or even a sanctuary for memories and self-expression, where they can be themselves.",
+          "This is a long-term project that I intend to maintain. I’ll be adding new features soon, always focusing on making the user experience clean, cozy, welcoming, and enjoyable in the long run. Access here: scribe-self.vercel.app"
+        ]
+      }
     ]
   }
 ];
